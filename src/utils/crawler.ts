@@ -2,12 +2,12 @@ import superagent from "superagent"; // ts -> .d.ts translate file -> js
 import fs from "fs";
 import path from "path";
 
-export interface Analyzer {
+export interface AnalyzerInterface {
   analyze: (html: string, filePath: string) => string;
 }
 
 class Crawler {
-  private filePath = path.resolve(__dirname, "../data/course.json");
+  private filePath = path.resolve(__dirname, "../../data/course.json");
 
   private async getRawHtml() {
     const result = await superagent.get(this.url);
@@ -24,7 +24,7 @@ class Crawler {
     this.writeFile(fileContent);
   }
 
-  constructor(private url: string, private analyzer: Analyzer) {
+  constructor(private url: string, private analyzer: AnalyzerInterface) {
     this.initSpiderProcess();
   }
 }
