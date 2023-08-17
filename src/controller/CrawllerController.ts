@@ -9,7 +9,6 @@ import Analyzer from "../utils/analyzer";
 import { BodyRequest } from "../const/interface";
 
 const checkLogin = (req: Request, res: Response, next: NextFunction): void => {
-  console.log("checklogin middleware");
   const isLogin = !!(req.session ? req.session.login : false);
   if (isLogin) {
     next();
@@ -18,22 +17,16 @@ const checkLogin = (req: Request, res: Response, next: NextFunction): void => {
   }
 };
 
-const test = (req: Request, res: Response, next: NextFunction): void => {
-  console.log("test middleware");
-};
-
-@controller("/")
+@controller("/api")
 export class CrawllerController {
   @get("/getData")
   @enumerable(true)
   @use(checkLogin)
-  @use(test)
   getData(req: BodyRequest, res: Response): void {
-    const secret = "XXXXX";
-    const url = `http://www.dell-lee.com/typescript/demo.html?secret=${secret}`;
+    const url = "https://crawler-target-test.netlify.app/";
     const analyzer = Analyzer.getInstance();
     new Crawler(url, analyzer);
-    res.json(getResponseData(true));
+    res.json(getResponseData<responseResult.getData>(true));
   }
 
   @get("/showData")
@@ -43,9 +36,9 @@ export class CrawllerController {
     try {
       const position = path.resolve(__dirname, "../../data/course.json");
       const result = fs.readFileSync(position, "utf-8");
-      res.json(getResponseData(JSON.parse(result)));
+      res.json(getResponseData<responseResult.showData>(JSON.parse(result)));
     } catch (e) {
-      res.json(getResponseData(false, "No Content!"));
+      res.json(getResponseData<responseResult.showData>(false, "No Content!"));
     }
   }
 }

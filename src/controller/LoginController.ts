@@ -1,13 +1,21 @@
 import "reflect-metadata";
-import { Request, Response } from "express";
+import { Response } from "express";
 import { controller, get, enumerable, post } from "../decorator";
 import { getResponseData } from "../utils/util";
 import { BodyRequest } from "../const/interface";
 
-@controller("/")
+@controller("/api")
 export class LoginController {
   static isLogin(req: BodyRequest): boolean {
     return !!(req.session ? req.session.login : false);
+  }
+
+  @get("/isLogin")
+  @enumerable(true)
+  isLogin(req: BodyRequest, res: Response): void {
+    const isLogin = LoginController.isLogin(req);
+    const result = getResponseData<responseResult.isLogin>(isLogin);
+    res.json(result);
   }
 
   @post("/login")
@@ -16,13 +24,13 @@ export class LoginController {
     const { password } = req.body;
     const isLogin = LoginController.isLogin(req);
     if (isLogin) {
-      res.json(getResponseData(false, "Already Login"));
+      res.json(getResponseData<responseResult.login>(true));
     } else {
       if (password === "123" && req.session) {
         req.session.login = true;
-        res.json(getResponseData(true));
+        res.json(getResponseData<responseResult.login>(true));
       } else {
-        res.json(getResponseData(false, "Login Failed"));
+        res.json(getResponseData<responseResult.login>(false, "Login Failed"));
       }
     }
   }
@@ -33,32 +41,6 @@ export class LoginController {
     if (req.session) {
       req.session.login = undefined;
     }
-    res.json(getResponseData(true));
-  }
-
-  @get("/")
-  @enumerable(true)
-  home(req: BodyRequest, res: Response): void {
-    const isLogin = LoginController.isLogin(req);
-    if (isLogin) {
-      res.send(`
-      <html>
-        <body>
-          <a href="/showData">Show Data</a>
-          <a href="/getData">Go Crawler</a>
-          <a href="/logout">Exit</a>
-        </body>
-      </html>`);
-    } else {
-      res.send(`
-      <html>
-        <body>
-            <form method="post" action="/login">
-              <input type="password" name="password" />
-              <button>Login</button>
-            </form>
-        </body>
-      </html>`);
-    }
+    res.json(getResponseData<responseResult.logout>(true));
   }
 }

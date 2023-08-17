@@ -2,7 +2,7 @@ import cheerio from "cheerio";
 import fs from "fs";
 import { AnalyzerInterface } from "./crawler";
 
-interface Course {
+export interface Course {
   title: string;
   count: number;
 }
@@ -26,19 +26,7 @@ export default class Analyzer implements AnalyzerInterface {
     return Analyzer.instance;
   }
 
-  getCourseInfo(html: string) {
-    const $ = cheerio.load(html);
-    const courseItems = $(".course-item");
-    let courseInfos: Course[] = [];
-    courseItems.map((index, element) => {
-      const descs = $(element).find(".course-desc");
-      const title = descs.eq(0).text();
-      const count = parseInt(descs.eq(1).text().split("：")[1]);
-      courseInfos.push({
-        title,
-        count,
-      });
-    });
+  getCourseInfo(courseInfos: Course[]) {
     return {
       time: new Date().getTime(),
       data: courseInfos,
@@ -54,8 +42,8 @@ export default class Analyzer implements AnalyzerInterface {
     return fileContent;
   }
 
-  public analyze(html: string, filePath: string) {
-    const courseInfo = this.getCourseInfo(html);
+  public analyze(data: Course[], filePath: string) {
+    const courseInfo = this.getCourseInfo(data);
     const fileContent = this.generateJsonContent(courseInfo, filePath);
     return JSON.stringify(fileContent);
   }
